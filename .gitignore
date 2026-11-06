@@ -1,0 +1,19 @@
+# secrets
+.env
+.env.local
+# deps/build
+node_modules/
+.next/
+out/
+dist/
+# local db (runtime cache; exported to data/ for git sync)
+data/*.db
+data/*.db-*
+# keep data/ JSON tracked
+!data/**/*.json
+!data/**/*.jsonl
+!data/**/*.yml
+!data/**/*.yaml
+!data/**/*.csv
+# os
+.DS_Storetsconfig.tsbuildinfo

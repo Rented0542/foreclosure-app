@@ -1,0 +1,30 @@
+version: "3.9"
+services:
+  app:
+    build: ..
+    ports: ["3000:3000"]
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/foreclosure
+      - AUTH_SECRET=change-me
+      - LLM_BASE_URL=http://manifest:2099/v1
+      - LLM_API_KEY=mnfst_local
+    depends_on: [db, manifest]
+    volumes:
+      - ../data:/app/data
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: foreclosure
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports: ["5432:5432"]
+  manifest:
+    image: mannft/manifest:latest
+    ports: ["2099:2099"]
+    volumes:
+      - manifestdata:/data
+volumes:
+  pgdata:
+  manifestdata:

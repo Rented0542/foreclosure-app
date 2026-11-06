@@ -1,0 +1,13 @@
+# Foreclosure Ops config (git-tracked)
+sources:
+  properties:
+    - hud
+    - va
+  buyers:
+    subreddits:
+      - FirstTimeHomeBuyer
+      - RealEstate
+      - personalfinance
+filters:
+  minScore: 60
+  maxPrice: 500000
