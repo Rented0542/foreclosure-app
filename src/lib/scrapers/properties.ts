@@ -27,8 +27,8 @@ export async function scrapeHud(max = 300): Promise<ScrapedProperty[]> {
         state: a.STATE_CODE,
         zip: a.DISPLAY_ZIP_CODE ? String(a.DISPLAY_ZIP_CODE) : undefined,
         status: "available",
-        url: caseNum ? `https://www.hudhomestore.gov/propertydetails?caseNumber=${caseNum}` : undefined,
-        raw: `HUD REO case ${caseNum}`,
+        url: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${address}, ${a.CITY}, ${a.STATE_CODE} ${a.DISPLAY_ZIP_CODE}`)}`,
+        raw: `HUD REO case ${caseNum}. HUD Home Store under maintenance until Nov 11, 2026; verify location via map link.`,
       });
     }
     offset += feats.length;
