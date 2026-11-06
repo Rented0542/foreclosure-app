@@ -17,3 +17,5 @@ data/*.db-*
 !data/**/*.csv
 # os
 .DS_Storetsconfig.tsbuildinfo
+AGENTS.md
+tsconfig.tsbuildinfo
