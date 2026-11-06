@@ -18,6 +18,10 @@ free providers from [awesome-free-llm-apis](https://github.com/mnfst/awesome-fre
 or directly at Gemini/Groq/Mistral/etc. Free providers whose terms are non-commercial
 (e.g. Cohere trial) are excluded by default.
 
+## Where the data comes from
+- Properties: HUD REO database via the public HUD ArcGIS REST service (real government-owned foreclosed homes), each with a link to the HUD Home Store property details page.
+- Buyers: public Reddit/Craigslist intent posts (structured by LLM). No paid lead lists.
+
 ## Data sync
 Local state lives in `data/` as JSON and is git-tracked, so a team can sync via
 pull/push. For a shared portal, set `DATABASE_URL` (Postgres) and deploy via

@@ -32,7 +32,7 @@ export default async function PropertiesPage() {
           <tbody>
             {rows.map((r: any) => (
               <tr key={r.id} className="border-t">
-                <td className="p-2">{r.address}</td>
+                <td className="p-2">{r.url ? <a href={r.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{r.address}</a> : r.address}</td>
                 <td>{r.city}, {r.state} {r.zip}</td>
                 <td>{r.price ? `$${r.price.toLocaleString()}` : "-"}</td>
                 <td>{r.beds ?? "-"} / {r.baths ?? "-"}</td>

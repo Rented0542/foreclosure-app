@@ -1,16 +1,12 @@
 import { db, initDb, schema } from "@/lib/db";
 import { newId } from "@/lib/storage/files";
-import { fetchHtml, parseGenericList } from "@/lib/scrapers/properties";
+import { scrapeHud } from "@/lib/scrapers/properties";
 import { scrapeReddit, scrapeCraigslist } from "@/lib/scrapers/buyers";
 import { scoreMatch, hardFilter } from "@/lib/matching/engine";
 import { getStatus } from "./state";
+import { eq } from "drizzle-orm";
 
-const PROPERTY_SOURCES = [
-  "https://www.hudhomestore.gov/",
-  "https://www.homes.usda.gov/",
-  "https://www.homepath.com/",
-  "https://www.homesteps.com/",
-];
+// (HUD REO database used; see scrapeHud)
 
 export async function runPropertyScan() {
   const st = getStatus("properties");
@@ -23,26 +19,22 @@ export async function runPropertyScan() {
   await db.insert(schema.scans).values({ id: scanId, source: "properties", startedAt: started, itemsFound: 0, itemsNew: 0 } as any);
   let found = 0, neu = 0, err: string | null = null;
   try {
-    for (const u of PROPERTY_SOURCES) {
-      try {
-        const html = await fetchHtml(u);
-        const items = parseGenericList(html, "web", u);
-        found += items.length;
-        for (const it of items) {
-          await db.insert(schema.properties).values({
-            id: newId(), source: it.source, externalId: it.externalId || null, address: it.address,
-            city: it.city || null, state: it.state || null, zip: it.zip || null, price: it.price || null,
-            beds: it.beds || null, baths: it.baths || null, sqft: it.sqft || null, type: it.type || null,
-            status: it.status || "unknown", auctionDate: it.auctionDate || null, url: it.url || null,
-            raw: it.raw || null, reviewStatus: "unreviewed", reviewedBy: null, notes: null,
-            firstSeen: new Date(), lastSeen: new Date(),
-          } as any);
-          neu++;
-        }
-      } catch (e: any) { err = e.message; }
+    const items = await scrapeHud(300);
+    found += items.length;
+    for (const it of items) {
+      const existing = it.externalId ? await db.select().from(schema.properties).where(eq(schema.properties.externalId, it.externalId)) : [];
+      if (existing.length) { neu++; continue; }
+      await db.insert(schema.properties).values({
+        id: newId(), source: it.source, externalId: it.externalId || null, address: it.address,
+        city: it.city || null, state: it.state || null, zip: it.zip || null, price: it.price || null,
+        beds: it.beds || null, baths: it.baths || null, sqft: it.sqft || null, type: it.type || null,
+        status: it.status || "unknown", auctionDate: it.auctionDate || null, url: it.url || null,
+        raw: it.raw || null, reviewStatus: "unreviewed", reviewedBy: null, notes: null,
+        firstSeen: new Date(), lastSeen: new Date(),
+      } as any);
+      neu++;
     }
   } catch (e: any) { err = e.message; }
-  const { eq } = await import("drizzle-orm");
   await db.update(schema.scans).set({ finishedAt: new Date(), itemsFound: found, itemsNew: neu, error: err } as any).where(eq(schema.scans.id, scanId));
   st.running = false;
   st.lastRun = new Date().toISOString();
@@ -84,7 +76,6 @@ export async function runBuyerScan() {
       neu++;
     }
   } catch (e: any) { err = e.message; }
-  const { eq } = await import("drizzle-orm");
   await db.update(schema.scans).set({ finishedAt: new Date(), itemsFound: found, itemsNew: neu, error: err } as any).where(eq(schema.scans.id, scanId));
   st.running = false;
   st.lastRun = new Date().toISOString();
